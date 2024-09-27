@@ -100,21 +100,30 @@ class Shop {
     return this.ageHasPassed(item) ? this.decreaseQuality(item, 4) : this.decreaseQuality(item, 2);
   };
   refactoredUpdateQuality() {
+    const itemStrategies = {
+      'Aged Brie': (item) => this.increaseQuality(item, 1),
+      'Backstage passes to a TAFKAL80ETC concert': (item) => this.updateBackStageQuality(item),
+      'Conjured Mana Cake': (item) => this.updateConjuredQuality(item),
+      'default': (item) => {
+        return this.ageHasPassed(item) 
+          ? this.decreaseQuality(item, 2) 
+          : this.decreaseQuality(item, 1);
+      }
+    };
+  
     this.items.forEach((item) => {
       if (item.name === 'Sulfuras, Hand of Ragnaros') return item;
+  
       item.sellIn -= 1;
-      if (item.name === 'Aged Brie') return this.increaseQuality(item, 1);
-      if (item.name === 'Backstage passes to a TAFKAL80ETC concert') return this.updateBackStageQuality(item);
-      if (item.name === 'Conjured Mana Cake') return this.updateConjuredQuality(item);
-      if (this.ageHasPassed(item)) {
-        return this.decreaseQuality(item, 2);
-      } else {
-        return this.decreaseQuality(item, 1);
-      }
+  
+      const strategy = itemStrategies[item.name] || itemStrategies['default'];
+  
+      strategy(item);
     });
-
+  
     return this.items;
   }
+  
 }
 module.exports = {
   Item,
