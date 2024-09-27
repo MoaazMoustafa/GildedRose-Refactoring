@@ -1,5 +1,5 @@
 class Item {
-  constructor(name, sellIn, quality){
+  constructor(name, sellIn, quality) {
     this.name = name;
     this.sellIn = sellIn;
     this.quality = quality;
@@ -7,7 +7,7 @@ class Item {
 }
 
 class Shop {
-  constructor(items=[]){
+  constructor(items = []) {
     this.items = items;
   }
   updateQuality() {
@@ -60,42 +60,55 @@ class Shop {
     return this.items;
   }
 
-  ageHasPassed(item){
+  ageHasPassed(item) {
     return item.sellIn < 0;
   }
 
-  increaseQuality(item, number){
+  increaseQuality(item, number) {
     item.quality = Math.min(item.quality + number, 50);
     return item;
   }
-  decreaseQuality(item, number){
+  decreaseQuality(item, number) {
     item.quality = Math.max(item.quality - number, 0);
     return item;
   }
 
-  updateBackStageQuality(item){
-    if (item.sellIn > 10){
-      this.increaseQuality(item, 1);
-    }
-    else if (10 >= item.sellIn && item.sellIn > 5){
-      this.increaseQuality(item, 2);
-    }
-    else if (5 >= item.sellIn && item.sellIn > 0){
-      this.increaseQuality(item, 3);
-    }else {
-      item.quality = 0;
+  updateBackStageQuality(item) {
+    switch (true) {
+      case item.sellIn > 10:
+        this.increaseQuality(item, 1);
+        break;
+      case 10 >= item.sellIn && item.sellIn > 5:
+        this.increaseQuality(item, 2);
+        break;
+      case 5 >= item.sellIn && item.sellIn > 0:
+        this.increaseQuality(item, 3);
+        break;
+      default:
+        item.quality = 0;
     }
     return item;
   }
-  refactoredUpdateQuality(){
-     this.items.forEach((item)=>{
+
+  updateConjuredQuality(item) {
+    /**
+     * The requirements was - "Conjured" items degrade in Quality twice as fast as normal items.
+     * So I decreased it twice as the fast as the normal items in both cases if the sellin is greater that or less than 0
+     * while in the texttest_fixture file he decreased it twice in the case of sellin is less than zero only
+     */
+
+    return this.ageHasPassed(item) ? this.decreaseQuality(item, 4) : this.decreaseQuality(item, 2);
+  };
+  refactoredUpdateQuality() {
+    this.items.forEach((item) => {
       if (item.name === 'Sulfuras, Hand of Ragnaros') return item;
       item.sellIn -= 1;
-      if(item.name === 'Aged Brie') return this.increaseQuality(item, 1);
-      if(item.name === 'Backstage passes to a TAFKAL80ETC concert') return this.updateBackStageQuality(item);
-      if (this.ageHasPassed(item)){
+      if (item.name === 'Aged Brie') return this.increaseQuality(item, 1);
+      if (item.name === 'Backstage passes to a TAFKAL80ETC concert') return this.updateBackStageQuality(item);
+      if (item.name === 'Conjured Mana Cake') return this.updateConjuredQuality(item);
+      if (this.ageHasPassed(item)) {
         return this.decreaseQuality(item, 2);
-      }else{
+      } else {
         return this.decreaseQuality(item, 1);
       }
     });
